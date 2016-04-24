@@ -1,0 +1,31 @@
+*/1 * * * * ping -c 1 10.1.10.1
+*/5 * * * * /root/wifi_recover.sh
+
+WIFIRECOVER.SH
+keepalive_host='10.1.10.1'
+
+ping -q -c1 $keepalive_host >> /dev/null
+
+if [ "$?" -ne "0" ]; then
+	echo "`date` WIFI DOWN" >> wifi_log.txt
+	ifdown wlan0
+	rmmod 8192cu
+	modprobe 8192cu
+	ifup wlan0
+	echo "`date` WIFI UP" >> wifi_log.txt
+fi
+
+
+
+/etc/modprobe.d/8192cu.conf
+# prevent power down of wireless when idle
+options 8192cu rtw_power_mgnt=0 rtw_enusbss=0
+
+network={
+ssid="etwater"
+psk="watergnome"
+proto=RSN
+key_mgmt=WPA-PSK
+pairwise=CCMP
+auth_alg=OPEN
+}
